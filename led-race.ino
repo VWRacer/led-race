@@ -32,9 +32,16 @@
 #include <Adafruit_NeoPixel.h>
 #define MAXLED         300 // MAX LEDs actives on strip
 
-#define PIN_LED        A0  // R 500 ohms to DI pin for WS2812 and WS2813, for WS2813 BI pin of first LED to GND  ,  CAP 1000 uF to VCC 5v/GND,power supplie 5V 2A
-#define PIN_FRICTION   A1  // potentiometer to adjust friction level
-#define PIN_GRAVITY    A2  // potentiometer to adjust gravity level  
+
+#define PIN_FRICTION_P1   A0  // potentiometer to adjust friction level for player 1
+#define PIN_GRAVITY_P1    A1  // potentiometer to adjust gravity level for player 1
+#define PIN_FRICTION_P2   A2  // potentiometer to adjust friction level for player 2
+#define PIN_GRAVITY_P2    A3  // potentiometer to adjust gravity level for player 2
+#define PIN_FRICTION_P3   A4  // potentiometer to adjust friction level for player 3
+#define PIN_GRAVITY_P3    A5  // potentiometer to adjust gravity level for player 3
+#define PIN_FRICTION_P4   A6  // potentiometer to adjust friction level for player 4
+#define PIN_GRAVITY_P4    A7  // potentiometer to adjust gravity level for player 4
+#define PIN_LED        9  // R 500 ohms to DI pin for WS2812 and WS2813, for WS2813 BI pin of first LED to GND  ,  CAP 1000 uF to VCC 5v/GND,power supplie 5V 2A
 #define PIN_START      8   // switch start button PIN and GND
 #define PIN_P1         7   // switch player 1 to PIN and GND
 #define PIN_P2         6   // switch player 2 to PIN and GND
@@ -108,17 +115,23 @@ byte loop4=0;
 
 byte leader=0;
 byte raceStarted=0;
-byte loop_max=5; //total laps race
+byte loop_max=5; // race total laps
 
 int eyecatcher_pos=0;
 
 byte demoMode=1;
 
 float ACEL=0.2;
-float kf=0.035; //default friction constant orig .015
-float kfMultiplier=0.01; //multiplier used to convert read potentiometer voltage to usable friction value
-float kg=0.003; //default gravity constant
-float kgMultiplier=0.001; //multiplier used to convert read potentiometer voltage to usable gravity value
+float kf1=0.035; // default player one friction constant orig .015
+float kf2=0.035; // default player two friction constant orig .015
+float kf3=0.035; // default player three friction constant orig .015
+float kf4=0.035; // default player four friction constant orig .015
+float kfMultiplier=0.01; // multiplier used to convert read potentiometer voltage to usable friction value
+float kg1=0.003; // default player one gravity constant
+float kg2=0.003; // default player two gravity constant
+float kg3=0.003; // default player three gravity constant
+float kg4=0.003; // default player four gravity constant
+float kgMultiplier=0.001; // multiplier used to convert read potentiometer voltage to usable gravity value
 
 byte flag_sw1=0;
 byte flag_sw2=0;
@@ -160,11 +173,13 @@ void setup() {
   pinMode(PIN_P2,INPUT_PULLUP);
   pinMode(PIN_P3,INPUT_PULLUP);
   pinMode(PIN_P4,INPUT_PULLUP);
+  // attach interrupt to DEMO pin
   attachInterrupt(digitalPinToInterrupt(DEMO_PIN), disableDemoMode, LOW); 
   pinMode(DEMO_PIN, INPUT_PULLUP);     
 }
 
 void start_race(){
+   // play starting music
    tone(PIN_AUDIO,g, 250);
     delay(230);
    noTone(PIN_AUDIO);  
@@ -185,9 +200,14 @@ void start_race(){
     delay(230);
    noTone(PIN_AUDIO);
     
+  // clear track
+  
   for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));};
   track.show();
   delay(2000);
+
+  // red, yellow, green starting countdown with tones
+  
   track.setPixelColor(12, track.Color(255,0,0));
   track.setPixelColor(11, track.Color(255,0,0));
   track.show();
@@ -258,6 +278,7 @@ void loop() {
             switch (eyecatcher_pos)
             {
               case 1:
+                // play race fanfare
                 tone(PIN_AUDIO,g, 250);
                 delay(230);
                noTone(PIN_AUDIO);  
@@ -330,19 +351,25 @@ void loop() {
           }
      
       }
+
+    // If start button is pressed start the race
+      
     if ((digitalRead(PIN_START)== LOW) && (entryCount>1) && (raceStarted==0)) //push start switch to start race
     {
-      set_ramp(20,47,53,60);    // ramp centred in LED 100 with 10 led fordward and 10 backguard 
-      set_ramp(30,200,210,221);
-      set_loop(16,145,166,190);
+      // set ramp and loop locations
+      
+      set_ramp(20,47,53,60);    // ramp centered on LED 53 with 6 uphill and 6 downhill and an incline of 20
+      set_ramp(30,200,210,221); // ramp centered on LED 210 with 10 uphill and 11 downhill and an incline of 30
+      set_loop(16,145,166,190); // loop centered on LED 166 with 21 uphill and 24 downhill and an incline of 16
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color((ramp_variance-gravity_map[i])/8,0,(ramp_variance-gravity_map[i])/8) );};
       track.show();
       delay(500);
       raceStarted=1;
       start_race();
     }
-
-    if ((digitalRead(PIN_P1)==0) && (raceStarted==0) && (p1joined==0)) //push button player 1 controller to join
+    // If player one button is pressed add them to the race and flash to confirm
+    
+    if ((digitalRead(PIN_P1)==0) && (raceStarted==0) && (p1joined==0)) // push button player 1 controller to join
     {
       p1joined=1;
       entryCount++;
@@ -356,7 +383,9 @@ void loop() {
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));}; track.show();
     }
 
-    if ((digitalRead(PIN_P2)==0) && (raceStarted==0) && (p2joined==0)) //push button player 2 controller to join
+    // If player two button is pressed add them to the race and flash to confirm
+    
+    if ((digitalRead(PIN_P2)==0) && (raceStarted==0) && (p2joined==0)) // push button player 2 controller to join
     {
       p2joined=1;
       entryCount++;
@@ -370,7 +399,9 @@ void loop() {
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));}; track.show();
     }
 
-    if ((digitalRead(PIN_P3)==0) && (raceStarted==0) && (p3joined==0)) //push button player 3 controller to join
+    // If player three button is pressed add them to the race and flash to confirm
+    
+    if ((digitalRead(PIN_P3)==0) && (raceStarted==0) && (p3joined==0)) // push button player 3 controller to join
     {
       p3joined=1;
       entryCount++;
@@ -384,7 +415,9 @@ void loop() {
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));}; track.show();
     }
 
-    if ((digitalRead(PIN_P4)==0) && (raceStarted==0) && (p4joined==0)) //push button player 4 controller to join
+    // If player four button is pressed add them to the race and flash to confirm
+    
+    if ((digitalRead(PIN_P4)==0) && (raceStarted==0) && (p4joined==0)) // push button player 4 controller to join
     {
       p4joined=1;
       entryCount++;
@@ -400,58 +433,115 @@ void loop() {
     
     if (raceStarted==1)
     {
-      kf=analogRead(PIN_FRICTION) * kfMultiplier;
-      kg=analogRead(PIN_GRAVITY) * kgMultiplier;
+      // Read friction and gravity values for player 1
+      
+      kf1=analogRead(PIN_FRICTION_P1) * kfMultiplier;
+      kg1=analogRead(PIN_GRAVITY_P1) * kgMultiplier;
+
+      // Read friction and gravity values for player 2
+      
+      kf2=analogRead(PIN_FRICTION_P2) * kfMultiplier;
+      kg2=analogRead(PIN_GRAVITY_P2) * kgMultiplier;
+
+      // Read friction and gravity values for player 3
+      
+      kf3=analogRead(PIN_FRICTION_P3) * kfMultiplier;
+      kg3=analogRead(PIN_GRAVITY_P3) * kgMultiplier;
+
+      // Read friction and gravity values for player 4
+      
+      kf4=analogRead(PIN_FRICTION_P4) * kfMultiplier;
+      kg4=analogRead(PIN_GRAVITY_P4) * kgMultiplier;
+      
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color((ramp_variance-gravity_map[i])/8,0,(ramp_variance-gravity_map[i])/8) );};
+      
+      /* --- PLAYER ONE CONTROLS --- */
+      
+      // Check controller button position for player 1
       
       if ( (flag_sw1==1) && (digitalRead(PIN_P1)==0) ) {flag_sw1=0;speed1+=ACEL;}
       if ( (flag_sw1==0) && (digitalRead(PIN_P1)==1) ) {flag_sw1=1;}
   
-      if ((gravity_map[(word)dist1 % NPIXELS])<ramp_variance) speed1-=kg*(ramp_variance-(gravity_map[(word)dist1 % NPIXELS]));
-      if ((gravity_map[(word)dist1 % NPIXELS])>ramp_variance) speed1+=kg*((gravity_map[(word)dist1 % NPIXELS])-ramp_variance);
+      // Apply gravity settings to current position for player 1
       
+      if ((gravity_map[(word)dist1 % NPIXELS])<ramp_variance) speed1-=kg1*(ramp_variance-(gravity_map[(word)dist1 % NPIXELS]));
+      if ((gravity_map[(word)dist1 % NPIXELS])>ramp_variance) speed1+=kg1*((gravity_map[(word)dist1 % NPIXELS])-ramp_variance);
       
-      speed1-=speed1*kf; 
+      // Apply friction adjustment to speed for player 1
+      
+      speed1-=speed1*kf1; 
+      
+      /* --- PLAYER TWO CONTROLS --- */
+      
+      // Check controller button position for player 2
       
       if ( (flag_sw2==1) && (digitalRead(PIN_P2)==0) ) {flag_sw2=0;speed2+=ACEL;}
       if ( (flag_sw2==0) && (digitalRead(PIN_P2)==1) ) {flag_sw2=1;}
   
-      if ((gravity_map[(word)dist2 % NPIXELS])<ramp_variance) speed2-=kg*(ramp_variance-(gravity_map[(word)dist2 % NPIXELS]));
-      if ((gravity_map[(word)dist2 % NPIXELS])>ramp_variance) speed2+=kg*((gravity_map[(word)dist2 % NPIXELS])-ramp_variance);
+      // Apply gravity settings to current position for player 2
+      
+      if ((gravity_map[(word)dist2 % NPIXELS])<ramp_variance) speed2-=kg2*(ramp_variance-(gravity_map[(word)dist2 % NPIXELS]));
+      if ((gravity_map[(word)dist2 % NPIXELS])>ramp_variance) speed2+=kg2*((gravity_map[(word)dist2 % NPIXELS])-ramp_variance);
           
-      speed2-=speed2*kf; 
+      // Apply friction adjustment to speed for player 2
+      
+      speed2-=speed2*kf2; 
   
+      /* PLAYER THREE CONTROLS --- */
+      
+      // Check controller button position for player 3
+      
       if ( (flag_sw3==1) && (digitalRead(PIN_P3)==0) ) {flag_sw3=0;speed3+=ACEL;}
       if ( (flag_sw3==0) && (digitalRead(PIN_P3)==1) ) {flag_sw3=1;}
   
-      if ((gravity_map[(word)dist3 % NPIXELS])<ramp_variance) speed3-=kg*(ramp_variance-(gravity_map[(word)dist3 % NPIXELS]));
-      if ((gravity_map[(word)dist3 % NPIXELS])>ramp_variance) speed3+=kg*((gravity_map[(word)dist3 % NPIXELS])-ramp_variance);
+      // Apply gravity settings to current position for player 3
+      
+      if ((gravity_map[(word)dist3 % NPIXELS])<ramp_variance) speed3-=kg3*(ramp_variance-(gravity_map[(word)dist3 % NPIXELS]));
+      if ((gravity_map[(word)dist3 % NPIXELS])>ramp_variance) speed3+=kg3*((gravity_map[(word)dist3 % NPIXELS])-ramp_variance);
           
-      speed3-=speed3*kf;
+      // Apply friction adjustment to speed for player 3
+      
+      speed3-=speed3*kf3;
   
+      /* --- PLAYER FOUR CONTROLS --- */
+      
+      // Check controller button position for player 4
+      
       if ( (flag_sw4==1) && (digitalRead(PIN_P4)==0) ) {flag_sw4=0;speed4+=ACEL;}
       if ( (flag_sw4==0) && (digitalRead(PIN_P4)==1) ) {flag_sw4=1;}
   
-      if ((gravity_map[(word)dist4 % NPIXELS])<ramp_variance) speed4-=kg*(ramp_variance-(gravity_map[(word)dist4 % NPIXELS]));
-      if ((gravity_map[(word)dist4 % NPIXELS])>ramp_variance) speed4+=kg*((gravity_map[(word)dist4 % NPIXELS])-ramp_variance);
+      // Apply gravity settings to current position for player 4
+      
+      if ((gravity_map[(word)dist4 % NPIXELS])<ramp_variance) speed4-=kg4*(ramp_variance-(gravity_map[(word)dist4 % NPIXELS]));
+      if ((gravity_map[(word)dist4 % NPIXELS])>ramp_variance) speed4+=kg4*((gravity_map[(word)dist4 % NPIXELS])-ramp_variance);
           
-      speed4-=speed4*kf;
+      // Apply friction adjustment to speed for player 4
+      
+      speed4-=speed4*kf4;
           
+      // Update distance for each player
+      
       dist1+=speed1;
       dist2+=speed2;
       dist3+=speed3;
       dist4+=speed4;
   
+      // Identify race leader
+      
       if ((dist1>dist2) && (dist1>dist3) && (dist1>dist4)) {leader=1;}
       if ((dist2>dist1) && (dist2>dist3) && (dist2>dist4)) {leader=2;}
       if ((dist3>dist1) && (dist3>dist2) && (dist3>dist4)) {leader=3;}
       if ((dist4>dist1) && (dist4>dist2) && (dist4>dist3)) {leader=4;}
         
+      // Generate a unique tone for each player as they complete a lap
+      
       if (dist1>NPIXELS*loop1) {loop1++;tone(PIN_AUDIO,500);TBEEP=2;}
       if (dist2>NPIXELS*loop2) {loop2++;tone(PIN_AUDIO,600);TBEEP=2;}
       if (dist3>NPIXELS*loop3) {loop3++;tone(PIN_AUDIO,700);TBEEP=2;}
       if (dist4>NPIXELS*loop4) {loop4++;tone(PIN_AUDIO,800);TBEEP=2;}
   
+      // Identify the first player to complete the final lap and set them as winner
+      
       if (loop1>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,255,0));}; track.show();
                                                       winner_fx();loop1=0;loop2=0;loop3=0;loop4=0;dist1=0;dist2=0;dist3=0;dist4=0;speed1=0;speed2=0;speed3=0;speed4=0;p1joined=0;p2joined=0;p3joined=0;p4joined=0;raceStarted=0;entryCount=0;timestamp=0;
                                                      }
@@ -464,6 +554,8 @@ void loop() {
       if (loop4>loop_max) {for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(255,255,0));}; track.show();
                                                       winner_fx();loop1=0;loop2=0;loop3=0;loop4=0;dist1=0;dist2=0;dist3=0;dist4=0;speed1=0;speed2=0;speed3=0;speed4=0;p1joined=0;p2joined=0;p3joined=0;p4joined=0;raceStarted=0;entryCount=0;timestamp=0;
                                                      }
+      // draw the dots on the track
+      
       draworder=random(1,4);
   
       if (draworder==1) {if (p1joined==1){draw_car1();};
@@ -496,7 +588,8 @@ void loop() {
     }
 }
 
-// Fill the dots one after the other with a color
+/* --- DEMO EFFECTS ---*/
+
 void colorWipe(uint32_t c, uint8_t wait) {
   for(uint16_t i=0; i<track.numPixels(); i++) {
       if(demoMode==0){
