@@ -17,14 +17,10 @@
 
  by gbarbarov@singulardevices.com  for Arduino day Seville 2019 
 
- Code made dirty and fast, next improvements in: 
- https://github.com/gbarbarov/led-race
- https://www.hackster.io/gbarbarov/open-led-race-a0331a
- https://twitter.com/openledrace
-
  Modifications made by Jim Leether and Kevin Justice
  at the M4Reactor Makerspace
  https://m4reactor.org
+ https://github.com/VWRacer/led-race
  
 */
 
@@ -122,15 +118,15 @@ int eyecatcher_pos=0;
 byte demoMode=1;
 
 float ACEL=0.2;
-float kf1=0.035; // default player one friction constant orig .015
-float kf2=0.035; // default player two friction constant orig .015
-float kf3=0.035; // default player three friction constant orig .015
-float kf4=0.035; // default player four friction constant orig .015
+float kf1=0.035; // default player one friction value
+float kf2=0.035; // default player two friction value
+float kf3=0.035; // default player three friction value
+float kf4=0.035; // default player four friction value
 float kfMultiplier=0.01; // multiplier used to convert read potentiometer voltage to usable friction value
-float kg1=0.003; // default player one gravity constant
-float kg2=0.003; // default player two gravity constant
-float kg3=0.003; // default player three gravity constant
-float kg4=0.003; // default player four gravity constant
+float kg1=0.003; // default player one gravity value
+float kg2=0.003; // default player two gravity value
+float kg3=0.003; // default player three gravity value
+float kg4=0.003; // default player four gravity value
 float kgMultiplier=0.001; // multiplier used to convert read potentiometer voltage to usable gravity value
 
 byte flag_sw1=0;
