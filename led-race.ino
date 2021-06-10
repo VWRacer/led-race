@@ -242,16 +242,16 @@ void winner_fx() {
    for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));}; track.show();                                 
   }
 
-
+// green
 void draw_car1(void){for(int i=0;i<=loop1;i++){track.setPixelColor(((word)dist1 % NPIXELS)+i, track.Color(0,255-i*20,0));};                   
   }
-
+//red
 void draw_car2(void){for(int i=0;i<=loop2;i++){track.setPixelColor(((word)dist2 % NPIXELS)+i, track.Color(255-i*20,0,0));};            
  }
-
+//blue
 void draw_car3(void){for(int i=0;i<=loop3;i++){track.setPixelColor(((word)dist3 % NPIXELS)+i, track.Color(0,0,255-i*20));};            
  }
-
+//yellow
 void draw_car4(void){for(int i=0;i<=loop4;i++){track.setPixelColor(((word)dist4 % NPIXELS)+i, track.Color(255-i*20,255-i*20,0));};            
  }
   
@@ -354,9 +354,14 @@ void loop() {
     {
       // set ramp and loop locations
       
-      set_ramp(20,47,53,60);    // ramp centered on LED 53 with 6 uphill and 6 downhill and an incline of 20
-      set_ramp(30,200,210,221); // ramp centered on LED 210 with 10 uphill and 11 downhill and an incline of 30
-      set_loop(16,145,166,190); // loop centered on LED 166 with 21 uphill and 24 downhill and an incline of 16
+      //original led racer for reference
+      //set_ramp(20,47,53,60);    // ramp centered on LED 53 with 6 uphill and 6 downhill and an incline of 20
+      //set_ramp(30,200,210,221); // ramp centered on LED 210 with 10 uphill and 11 downhill and an incline of 30
+      //set_loop(16,145,166,190); // loop centered on LED 166 with 21 uphill and 24 downhill and an incline of 16
+      set_ramp(15,12,20,37);
+      set_loop(16,50,68,86);
+      set_ramp(35,93,113,128,35);
+      set_ramp(40,121,167,281);
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color((ramp_variance-gravity_map[i])/8,0,(ramp_variance-gravity_map[i])/8) );};
       track.show();
       delay(500);
