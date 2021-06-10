@@ -40,7 +40,7 @@
 #define PIN_LED        9  // R 500 ohms to DI pin for WS2812 and WS2813, for WS2813 BI pin of first LED to GND  ,  CAP 1000 uF to VCC 5v/GND,power supplie 5V 2A
 #define PIN_START      8   // switch start button PIN and GND
 #define PIN_P1         7   // switch player 1 to PIN and GND
-#define PIN_P2         6   // switch player 2 to PIN and GND
+#define PIN_P2         10   // switch player 2 to PIN and GND pin 6 for Uno pin 10 for Teensy++ 2.0 (to avoid conflict with onboard LED)
 #define PIN_P3         5   // switch player 3 to PIN and GND
 #define PIN_P4         4   // switch player 4 to PIN and GND 
 #define PIN_AUDIO      3   // through CAP 2uf to speaker 8 ohms
@@ -68,12 +68,6 @@ const int gSH = 830;
 const int aH = 880;
 
 int NPIXELS=MAXLED; // leds on track
-
-// red, green, blue and yellow dots
-#define COLOR1    track.Color(255,0,0)
-#define COLOR2    track.Color(0,255,0)
-#define COLOR3    track.Color(0,0,255)
-#define COLOR4    track.Color(255,255,0)
 
 int win_music[] = {
   2637, 2637, 0, 2637, 
@@ -118,16 +112,16 @@ int eyecatcher_pos=0;
 byte demoMode=1;
 
 float ACEL=0.2;
-float kf1=0.035; // default player one friction value
-float kf2=0.035; // default player two friction value
-float kf3=0.035; // default player three friction value
-float kf4=0.035; // default player four friction value
-float kfMultiplier=0.01; // multiplier used to convert read potentiometer voltage to usable friction value
-float kg1=0.003; // default player one gravity value
-float kg2=0.003; // default player two gravity value
-float kg3=0.003; // default player three gravity value
-float kg4=0.003; // default player four gravity value
-float kgMultiplier=0.001; // multiplier used to convert read potentiometer voltage to usable gravity value
+double kf1=0.035; // default player one friction value
+double kf2=0.035; // default player two friction value
+double kf3=0.035; // default player three friction value
+double kf4=0.035; // default player four friction value
+double kfMultiplier=0.00005; // multiplier used to convert read potentiometer voltage to usable friction value
+double kg1=0.003; // default player one gravity value
+double kg2=0.003; // default player two gravity value
+double kg3=0.003; // default player three gravity value
+double kg4=0.003; // default player four gravity value
+double kgMultiplier=0.000005; // multiplier used to convert read potentiometer voltage to usable gravity value
 
 byte flag_sw1=0;
 byte flag_sw2=0;
@@ -354,9 +348,11 @@ void loop() {
     {
       // set ramp and loop locations
       
-      set_ramp(20,47,53,60);    // ramp centered on LED 53 with 6 uphill and 6 downhill and an incline of 20
-      set_ramp(30,200,210,221); // ramp centered on LED 210 with 10 uphill and 11 downhill and an incline of 30
-      set_loop(16,145,166,190); // loop centered on LED 166 with 21 uphill and 24 downhill and an incline of 16
+      set_ramp(15,12,20,37);
+      set_loop(16,50,68,86);
+      set_ramp(35,93,113,128);
+      set_ramp(40,121,167,281);
+
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color((ramp_variance-gravity_map[i])/8,0,(ramp_variance-gravity_map[i])/8) );};
       track.show();
       delay(500);
@@ -433,12 +429,12 @@ void loop() {
       
       kf1=analogRead(PIN_FRICTION_P1) * kfMultiplier;
       kg1=analogRead(PIN_GRAVITY_P1) * kgMultiplier;
-
+      
       // Read friction and gravity values for player 2
       
       kf2=analogRead(PIN_FRICTION_P2) * kfMultiplier;
       kg2=analogRead(PIN_GRAVITY_P2) * kgMultiplier;
-
+      
       // Read friction and gravity values for player 3
       
       kf3=analogRead(PIN_FRICTION_P3) * kfMultiplier;
