@@ -74,6 +74,8 @@ int win_music[] = {
   0, 2093, 2637, 0,
   3136    
 };
+
+int playersRacing[4] = {0,0,0,0};
       
 byte  gravity_map[MAXLED];     
 
@@ -116,12 +118,12 @@ double kf1=0.035; // default player one friction value
 double kf2=0.035; // default player two friction value
 double kf3=0.035; // default player three friction value
 double kf4=0.035; // default player four friction value
-double kfMultiplier=0.00005; // multiplier used to convert read potentiometer voltage to usable friction value
+double kfMultiplier=0.00007; // multiplier used to convert read potentiometer voltage to usable friction value
 double kg1=0.003; // default player one gravity value
 double kg2=0.003; // default player two gravity value
 double kg3=0.003; // default player three gravity value
 double kg4=0.003; // default player four gravity value
-double kgMultiplier=0.000005; // multiplier used to convert read potentiometer voltage to usable gravity value
+double kgMultiplier=0.000003; // multiplier used to convert read potentiometer voltage to usable gravity value
 
 byte flag_sw1=0;
 byte flag_sw2=0;
@@ -350,8 +352,8 @@ void loop() {
       
       set_ramp(15,12,20,37);
       set_loop(16,50,68,86);
-      set_ramp(35,93,113,128);
-      set_ramp(40,121,167,281);
+      set_ramp(20,93,113,128);
+      set_ramp(15,128,167,281);
 
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color((ramp_variance-gravity_map[i])/8,0,(ramp_variance-gravity_map[i])/8) );};
       track.show();
@@ -373,6 +375,7 @@ void loop() {
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,255,0));}; track.show();
       delay(100);
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));}; track.show();
+      playersRacing[0] = 1;
     }
 
     // If player two button is pressed add them to the race and flash to confirm
@@ -389,6 +392,7 @@ void loop() {
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(255,0,0));}; track.show();
       delay(100);
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));}; track.show();
+      playersRacing[1] = 1;
     }
 
     // If player three button is pressed add them to the race and flash to confirm
@@ -405,6 +409,7 @@ void loop() {
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,255));}; track.show();
       delay(100);
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));}; track.show();
+      playersRacing[2] = 1;
     }
 
     // If player four button is pressed add them to the race and flash to confirm
@@ -421,6 +426,33 @@ void loop() {
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(255,255,0));}; track.show();
       delay(100);
       for(int i=0;i<NPIXELS;i++){track.setPixelColor(i, track.Color(0,0,0));}; track.show();
+      playersRacing[3] = 1;
+    }
+
+    // Draw dots to show who has checked in to race
+
+    if ((playersRacing[0]==1) && (raceStarted==0))
+    {
+      track.setPixelColor(1, track.Color(0,255,0));
+      track.show();
+    }
+
+    if ((playersRacing[1]==1) && (raceStarted==0))
+    {
+      track.setPixelColor(2, track.Color(255,0,0));
+      track.show();
+    }
+
+    if ((playersRacing[2]==1) && (raceStarted==0))
+    {
+      track.setPixelColor(3, track.Color(0,0,255));
+      track.show();
+    }
+
+    if ((playersRacing[3]==1) && (raceStarted==0))
+    {
+      track.setPixelColor(4, track.Color(255,255,0));
+      track.show();
     }
     
     if (raceStarted==1)
